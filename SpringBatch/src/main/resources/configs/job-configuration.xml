@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+	<import resource="/infratrcuture-configuration.xml" />
+
+	<batch:job id="importProducts">
+		<batch:step id="preRun" next="readWriteProducts">
+			<batch:tasklet ref="preStep">
+			</batch:tasklet>
+		</batch:step>
+		<batch:step id="readWriteProducts">
+			<batch:tasklet>
+				<batch:chunk reader="productReader" writer="productWriter"
+					commit-interval="1" skip-limit="1">
+					<!-- The below skippable exception classes are used to generated when there is an error in the flat file.
+						 Since we are using FlatFileItemReader it throws the below exception. It varies for each and every reader. -->
+					<batch:skippable-exception-classes>
+						<batch:include
+							class="org.springframework.batch.item.file.FlatFileParseException"></batch:include>
+					</batch:skippable-exception-classes>
+				</batch:chunk>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<!-- Pre Step Configuration -->
+	<bean id="preStep" class="com.learnSpringBatch.preStep.PreStep"></bean>
+
+	<!-- Reader Configuration -->
+	<bean id="productReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+		<property name="resource" value="#{jobParameters['inputFile']}">
+			<!-- value="classpath:com/learnSpringBatch/resources/Product_Samples.txt" -->
+			</property>
+		<property name="linesToSkip" value="1"></property>
+		<property name="lineMapper" ref="defaultMapper"></property>
+	</bean>
+
+	<bean id="defaultMapper"
+		class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+		<property name="lineTokenizer" ref="productlineTokenizer"></property>
+		<property name="fieldSetMapper" ref="productfieldSetMapper"></property>
+	</bean>
+
+	<bean id="productlineTokenizer"
+		class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+		<property name="names" value="PRODUCT_ID,NAME,DESCRIPTION,PRICE"></property>
+	</bean>
+
+	<bean id="productfieldSetMapper" class="com.learnSpringBatch.mapper.FieldSetMapper">
+	</bean>
+
+	<!-- Writer Configuration -->
+	<bean id="productWriter" class="com.learnSpringBatch.writer.ProductWriter">
+		<constructor-arg name="dataSource" ref="dataSource"></constructor-arg>
+	</bean>
+	
+		<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+
+		<property name="location">
+			<value>application.properties</value>
+		</property>
+	</bean>
+	
+
+</beans>
