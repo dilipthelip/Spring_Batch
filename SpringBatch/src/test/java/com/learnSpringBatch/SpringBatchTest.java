@@ -14,7 +14,7 @@ public class SpringBatchTest {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:MM:SS");
         
         String[] jobCommand = new String[3];
-        jobCommand[0] = new String("com/learnSpringBatch/configs/job-configuration.xml");
+        jobCommand[0] = new String("/configs/job-configuration.xml");
         jobCommand[1] = new String("importProducts");
         jobCommand[2] = new String("schedule.date(date)="+ dateFormat.format(calendar.getTime()));
         try {

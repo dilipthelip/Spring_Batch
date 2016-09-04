@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:batch="http://www.springframework.org/schema/batch"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/batch
+    http://www.springframework.org/schema/batch/spring-batch.xsd"> -->
+    <beans:beans
+  xmlns="http://www.springframework.org/schema/batch"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  xsi:schemaLocation="http://www.springframework.org/schema/batch
+    http://www.springframework.org/schema/batch/spring-batch.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
+		
+	 
+	 <!-- <batch:job id=""></batch:job> -->
+	 
+	<job id="xys">
+		<step id="first">
+			<tasklet>
+				<chunk>
+					<reader>
+					</reader>
+					<processor>
+					</processor>
+					<writer>
+					</writer>
+				
+				</chunk>
+			</tasklet>
+		</step>
+	
+	</job>
+<!-- </beans> -->
+
+</beans:beans>

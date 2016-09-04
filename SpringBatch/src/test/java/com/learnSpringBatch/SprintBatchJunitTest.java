@@ -29,7 +29,7 @@ import junit.framework.TestCase;
  * @author Z001QGD
  *
  */
-//@Configuration
+@Configuration
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={"/configs/job-configuration.xml"})
 //@PropertySource("classpath:application.properties")
@@ -40,10 +40,6 @@ public class SprintBatchJunitTest extends TestCase {
 
 	@Autowired
 	private Job job;
-	
-	@Value("${test.reader}")
-	private String env;
-	
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -59,8 +55,8 @@ public class SprintBatchJunitTest extends TestCase {
 		//System.out.println("Inside Import Products");
 		try {
 			//String str = env.getProperty("test.reader");
-			System.out.println("env : "+ env);
-			jobLauncher.run(job, new JobParametersBuilder().addString("inputFile", "/InputFiles/Product_Samples.txt").addLong("timestamp", System.currentTimeMillis())
+			//System.out.println("env : "+ env);
+			jobLauncher.run(job, new JobParametersBuilder().addLong("timestamp", System.currentTimeMillis()).addString("inputFile", "C:\\Dilip\\Study\\Spring_Batch\\workspace\\SpringBatch\\src\\main\\resources\\Product_Samples.txt")
 					.toJobParameters());
 			
 		} catch (JobExecutionAlreadyRunningException e) {
