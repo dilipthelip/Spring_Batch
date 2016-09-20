@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -33,16 +34,13 @@ import junit.framework.TestCase;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={"/configs/job-configuration.xml"})
 //@PropertySource("classpath:application.properties")
-public class SprintBatchJunitTest extends TestCase {
+public class SpringBatchJunitTest extends TestCase {
 
 	@Autowired
 	private JobLauncher jobLauncher;
 
 	@Autowired
 	private Job job;
-	
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
 
 	@Before
 	public void setUp(){
@@ -56,8 +54,11 @@ public class SprintBatchJunitTest extends TestCase {
 		try {
 			//String str = env.getProperty("test.reader");
 			//System.out.println("env : "+ env);
-			jobLauncher.run(job, new JobParametersBuilder().addLong("timestamp", System.currentTimeMillis()).addString("inputFile", "C:\\Dilip\\Study\\Spring_Batch\\workspace\\SpringBatch\\src\\main\\resources\\Product_Samples.txt")
+			
+			JobExecution execution = jobLauncher.run(job, new JobParametersBuilder().addLong("timestamp", System.currentTimeMillis()).addString("inputFile", "/Dilip/Study/Spring_Batch/workspace/SpringBatch/src/main/resources/Product_Samples.txt")
 					.toJobParameters());
+			
+			System.out.println("Execution Status : " +  execution.getExitStatus() + execution.getExitStatus().getExitCode());
 			
 		} catch (JobExecutionAlreadyRunningException e) {
 			// TODO Auto-generated catch block

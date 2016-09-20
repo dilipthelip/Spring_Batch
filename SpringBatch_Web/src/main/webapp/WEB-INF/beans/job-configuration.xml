@@ -118,13 +118,13 @@
 	
 	
 	
-		<bean
+		<!-- <bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 
 		<property name="location">
 			<value>application.properties</value>
 		</property>
-	</bean>
+	</bean> -->
 	
 
 </beans>
