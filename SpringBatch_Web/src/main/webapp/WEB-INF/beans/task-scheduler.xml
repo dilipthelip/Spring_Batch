@@ -10,14 +10,19 @@
 
 	<import resource="infratrcuture-configuration.xml" />
 	<import resource="job-configuration.xml" />
-
+	
+	<!-- Bean that has the launching code for the job -->
 	<bean id="springSchedulingLauncher" class="com.learnSpringBatch.scheduler.SpringSchedulingLauncher">
 	</bean>
 
 	<task:scheduler id="scheduler" />
 
 	<task:scheduled-tasks scheduler="scheduler">
-
+		<!-- 
+		Atributes Explaination:
+		method - Method to launch in the spring bean.
+		fixed-rate - how often do u want to launch this job.Time is metioned in milliseconds.
+		 -->
 		<task:scheduled ref="springSchedulingLauncher" method="importProducts"
 			fixed-rate="5000" />
 	</task:scheduled-tasks>

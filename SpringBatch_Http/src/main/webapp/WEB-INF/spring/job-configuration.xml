@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:batch="http://www.springframework.org/schema/batch" 
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd 
+		 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+
+	<import resource="/infratrcuture-configuration.xml" />
+	<bean class="com.learnSpringBatch.exitcode.SkippedAwareExitCodeMapper"></bean>
+	<batch:job id="importProducts">
+		<batch:step id="preRun" next="readWriteProducts">
+			<batch:tasklet ref="preStep">
+			</batch:tasklet>
+			
+		</batch:step>
+		
+		
+		<batch:step id="readWriteProducts">
+			<batch:tasklet>
+				<batch:chunk reader="productReader"  processor="productProcessor"  writer="productWriter"
+					commit-interval="1" skip-limit="1" cache-capacity="2"  >
+					<!-- The below skippable exception classes are used to handle the exception when there is an error in the flat file.
+						 Since we are using FlatFileItemReader it throws the below exception. It varies for each and every reader. -->
+					<batch:skippable-exception-classes>
+						<batch:include
+							class="org.springframework.batch.item.file.FlatFileParseException"></batch:include>
+						
+							<batch:include class="java.io.FileNotFoundException"></batch:include>
+					</batch:skippable-exception-classes>
+					
+					<batch:listeners>
+						<batch:listener ref="chunkProductListener"></batch:listener>
+					</batch:listeners>
+				</batch:chunk>
+			</batch:tasklet>
+				<!-- This listener is at the step level.  -->
+				<batch:listeners> 
+					<batch:listener ref="stepProductListener"></batch:listener>
+				</batch:listeners>
+		</batch:step>
+					<!-- This listener is at the Job level.  -->
+					<!-- <batch:listeners>
+						<batch:listener ref="importProductsListener"/>
+					</batch:listeners> -->
+					
+					<batch:listeners>
+						<batch:listener ref="importProductsListenerAnnotated"/>
+					</batch:listeners> 
+	</batch:job>
+	
+	<!-- Job Repository -->
+	<batch:job-repository id="jobRepository" data-source="dataSource" 
+						  transaction-manager="transactionManager" isolation-level-for-create="SERIALIZABLE" 
+							table-prefix="BATCH_"/>
+	
+
+	<!-- Pre Step Configuration -->
+	<bean id="preStep" class="com.learnSpringBatch.preStep.PreStep"></bean>
+
+	<!-- Reader Configuration -->
+	<bean id="productReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+		 <property name="resource" value="file:#{jobParameters['inputFile']}"> </property>
+			<!-- value="classpath:com/learnSpringBatch/resources/Product_Samples.txt" -->
+			<!-- <property name="resource" value="/Product_Samples.txt">
+			</property> -->
+		<property name="linesToSkip" value="1"></property>
+		<property name="lineMapper" ref="defaultMapper"></property>
+	</bean>
+
+	<bean id="defaultMapper"
+		class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+		<property name="lineTokenizer" ref="productlineTokenizer"></property>
+		<property name="fieldSetMapper" ref="productfieldSetMapper"></property>
+	</bean>
+
+	<bean id="productlineTokenizer"
+		class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+		<property name="names" value="PRODUCT_ID,NAME,DESCRIPTION,PRICE"></property>
+	</bean>
+
+	<bean id="productfieldSetMapper" class="com.learnSpringBatch.mapper.FieldSetMapper">
+	</bean>
+	
+	<!-- Processor Configuraration -->
+	<bean id="productProcessor" class="com.learnSpringBatch.processor.ProductProcessor">
+	</bean>
+	
+	<!-- Writer Configuration -->
+	<bean id="productWriter" class="com.learnSpringBatch.writer.ProductWriter">
+		<constructor-arg name="dataSource" ref="dataSource"></constructor-arg>
+	</bean>
+	
+	<bean id="productChunkCompletionPolicy" class="com.learnSpringBatch.chunk.ProductChunkCompletionPolicy">
+	</bean>
+	
+	<!-- Job Listener classed that will be invoked before and after the execution of the job. This listener is at the Job level. -->
+	<bean id="importProductsListener" class="com.learnSpringBatch.listener.ProductListener">
+	</bean>
+	
+	<bean id="importProductsListenerAnnotated" class="com.learnSpringBatch.listener.ProductListerAnnotation">
+	</bean>
+	
+	<!-- This listener gets executed after completion of the step -->
+	<bean id="stepProductListener" class="com.learnSpringBatch.listener.ProductStepListener">
+	</bean>
+	
+	<!-- This listener gets executed after completion of the chunk.-->
+	<bean id="chunkProductListener" class="com.learnSpringBatch.listener.ProductChunkListener">
+	</bean>
+	
+	<!-- The below bean declaration is used to get the exit code of the Job execution -->
+	<bean id="skippedAwareExitCodeMapper" class="com.learnSpringBatch.exitcode.SkippedAwareExitCodeMapper">
+	</bean>
+	
+	
+	
+	
+	
+		<!-- <bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+
+		<property name="location">
+			<value>application.properties</value>
+		</property>
+	</bean> -->
+	
+
+</beans>
